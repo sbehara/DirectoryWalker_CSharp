@@ -1,0 +1,76 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.IO;
+namespace DirFileSize
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            //string folderPath = "C:\\DevWs\\kotlinc";
+            //string folderPath2 = "\\\\awsfiles.tmsoffice.com\\ndrive\\RTB_TBD";
+            string inputFile = "C:\\Projects\\DirFileSize\\InputFileList.txt";
+            //string folderPathMerchants = "\\\\files\\dbstore$\\Merchants\\";
+            long totalSize = GetDirSizeInclSubFolders(inputFile);
+            Console.WriteLine("Folder size is " + totalSize);
+        }
+
+        static long GetDirSizeInclSubFolders(string folderPath)
+        {
+            //string[] fileNames = System.IO.Directory.GetFiles(folderPath, "*.pdf", System.IO.SearchOption.AllDirectories);
+            long totalSize = 0;
+            StreamWriter notFoundList = new StreamWriter("C:\\Projects\\DirFileSize\\FilesNotFoundInTargetLocation.txt");
+            StreamWriter outputFile = new StreamWriter("C:\\Projects\\DirFileSize\\OutputFile.txt");
+            StreamReader inputFile = new StreamReader(folderPath);
+            string line = "";
+            long lineNumber = 0;
+            int flushCounter = 0;
+            try
+            {
+                while ((line = inputFile.ReadLine()) != null)
+                {
+                    lineNumber++;
+                    flushCounter++;
+                    System.IO.FileInfo fileInfo = new System.IO.FileInfo(line);
+                    if (!fileInfo.Exists)
+                    {
+                        notFoundList.WriteLine(line);
+                        continue;
+                    }
+                    string newLine = fileInfo.FullName + "\t" + fileInfo.Length + "\tbytes";
+                    outputFile.WriteLine(newLine);
+                    //if (flushCounter > 10000)
+                    //{
+                    //    outputFile.Flush();
+                    //    flushCounter = 0;
+                    //}
+                    totalSize += fileInfo.Length;
+                }
+                outputFile.WriteLine("Total size of all " + lineNumber + " files in bytes: " + totalSize);
+                inputFile.Close();
+                outputFile.Close();
+                notFoundList.Close();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message, ex.StackTrace);
+            }
+            /*
+            foreach(string fileName in fileNames)
+            {
+                System.IO.FileInfo fileInfo = new System.IO.FileInfo(fileName);
+                string newLine = fileInfo.Name + "\t" + fileInfo.Length + "\tbytes";
+                outputFile.WriteLine(newLine);
+                outputFile.Flush();
+                totalSize += fileInfo.Length;
+            }
+            outputFile.WriteLine("Total size of all files in bytes: " + totalSize);
+            outputFile.Close();
+             * */
+            return totalSize;
+        }
+    }
+}
